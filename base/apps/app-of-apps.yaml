@@ -8,8 +8,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/your-repo.git
-    targetRevision: HEAD
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+    targetRevision: dev
     path: manifest/overlays/{{ENVIRONMENT}}
   destination:
     server: https://kubernetes.default.svc
@@ -19,4 +19,14 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true 
+      - CreateNamespace=true
+  # Docker 이미지 설정을 위한 환경변수
+  template:
+    spec:
+      containers:
+        - name: app-of-apps
+          env:
+            - name: DOCKER_REGISTRY
+              value: "docker.io"  # Docker Hub (향후 ECR로 변경 예정)
+            - name: IMAGE_PULL_POLICY
+              value: "Always" 

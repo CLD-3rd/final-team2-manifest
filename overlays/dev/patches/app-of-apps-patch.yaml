@@ -5,8 +5,8 @@ metadata:
   namespace: argocd-dev
 spec:
   source:
-    repoURL: https://github.com/your-org/your-repo.git
-    targetRevision: HEAD
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+    targetRevision: dev
     path: manifest/overlays/dev
   destination:
     namespace: argocd-dev 

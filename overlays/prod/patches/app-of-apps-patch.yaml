@@ -5,7 +5,7 @@ metadata:
   namespace: argocd-prod
 spec:
   source:
-    repoURL: https://github.com/your-org/your-repo.git
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
     targetRevision: HEAD
     path: manifest/overlays/prod
   destination:

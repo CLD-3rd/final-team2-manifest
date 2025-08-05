@@ -20,7 +20,7 @@ configMapGenerator:
   - name: argocd-config
     literals:
       - ENVIRONMENT=prod
-      - REPO_URL=https://github.com/your-org/your-repo.git
+      - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
 
 commonLabels:
   environment: prod
