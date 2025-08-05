@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-ingress-dev
+  namespace: argocd-dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    chart: ingress-nginx
+    targetRevision: 4.8.3
+    helm:
+      values: |
+        controller:
+          replicaCount: 1  # Dev 환경: 적은 리소스
+          service:
+            type: LoadBalancer
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+              service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+          resources:
+            requests:
+              cpu: 50m      # Dev 환경: 적은 리소스
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          config:
+            use-forwarded-headers: "true"
+            proxy-real-ip-cidr: "0.0.0.0/0"
+        defaultBackend:
+          enabled: true
+          replicaCount: 1   # Dev 환경: 1개만
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ingress-nginx-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 

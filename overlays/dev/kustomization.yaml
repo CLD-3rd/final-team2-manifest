@@ -5,6 +5,9 @@ namespace: argocd-dev
 
 resources:
   - ../../base
+  - applications/nginx-ingress.yaml
+  - applications/cert-manager.yaml
+  - applications/backend-api.yaml
 
 patches:
   - path: patches/argocd-patch.yaml

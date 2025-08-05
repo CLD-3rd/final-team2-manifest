@@ -1,0 +1,107 @@
+---
+# Backend API Deployment (Prod 환경)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-prod
+  namespace: backend-prod
+  labels:
+    app: backend-api
+    environment: prod
+spec:
+  replicas: 3  # Prod 환경: 3개 (고가용성)
+  selector:
+    matchLabels:
+      app: backend-api
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: backend-api
+        environment: prod
+    spec:
+      containers:
+      - name: backend-api
+        # 🐳 Docker Hub 이미지 사용 (Prod 버전)
+        image: your-dockerhub-username/backend-api:latest
+        imagePullPolicy: IfNotPresent  # Prod 환경: 안정성을 위해 변경시에만
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"  # Prod 환경: Info 로그
+        - name: DB_HOST_POSTGRESQL
+          value: "10.0.20.43"
+        - name: DB_HOST_MONGODB
+          value: "10.0.30.218"
+        resources:
+          requests:
+            memory: "256Mi"  # Prod 환경: 높은 리소스
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# Backend API Service (Prod)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-service-prod
+  namespace: backend-prod
+spec:
+  selector:
+    app: backend-api
+    environment: prod
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP
+---
+# Backend API Ingress (Prod)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api-ingress-prod
+  namespace: backend-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # Prod 환경: Production 인증서
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://goteego.store,https://www.goteego.store"
+spec:
+  tls:
+  - hosts:
+    - api.goteego.store  # Prod 환경: 메인 도메인
+    secretName: backend-api-prod-tls
+  rules:
+  - host: api.goteego.store
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api-service-prod
+            port:
+              number: 80
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend-prod 
