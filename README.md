@@ -24,6 +24,8 @@
    - PostgreSQL Secondary: `10.0.21.1` (AZ2)
    - MongoDB Primary: `10.0.30.1` (AZ1)
    - MongoDB Secondary: `10.0.31.1` (AZ2)
+   - ElastiCache Redis Primary: `10.0.40.1` (AZ1)
+   - ElastiCache Redis Secondary: `10.0.41.1` (AZ2)
 
 4. **cert-manager ClusterIssuer**
    - Dev: `letsencrypt-staging` ✅ **완료**
