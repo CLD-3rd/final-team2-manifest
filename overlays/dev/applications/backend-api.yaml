@@ -1,0 +1,137 @@
+---
+# Backend API Deployment (Dev 환경)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-dev
+  namespace: backend-dev
+  labels:
+    app: backend-api
+    environment: dev
+spec:
+  replicas: 1  # Dev 환경: 1개만
+  selector:
+    matchLabels:
+      app: backend-api
+      environment: dev
+  template:
+    metadata:
+      labels:
+        app: backend-api
+        environment: dev
+    spec:
+      containers:
+      - name: backend-api
+        # Docker Hub 태그 확인 후 수정 필요
+        image: cjsqudwns/goteego-server:latest
+        imagePullPolicy: Always  # Dev 환경: 항상 최신 이미지
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: ENVIRONMENT
+          value: "development"
+        - name: LOG_LEVEL
+          value: "debug"  # Dev 환경: 디버그 로그
+        # 🚨 TODO: Read/Write 가능한 DB 엔드포인트 두 개씩 설정
+        # PostgreSQL - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_POSTGRESQL_PRIMARY
+          value: "10.0.20.1"  # PostgreSQL AZ1
+        - name: DB_HOST_POSTGRESQL_SECONDARY
+          value: "10.0.21.1"  # PostgreSQL AZ2
+        # DocumentDB - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_MONGODB_PRIMARY
+          value: "10.0.30.1"  # MongoDB AZ1
+        - name: DB_HOST_MONGODB_SECONDARY
+          value: "10.0.31.1"  # MongoDB AZ2
+        # DB 연결 설정
+        - name: DB_PORT_POSTGRESQL
+          value: "5432"
+        - name: DB_PORT_MONGODB
+          value: "27017"
+        # DB 이름 설정 (선택사항)
+        - name: DB_NAME_POSTGRESQL
+          value: "goteego_dev"
+        - name: DB_NAME_MONGODB
+          value: "goteego_dev"
+        resources:
+          requests:
+            memory: "128Mi"  # Dev 환경: 적은 리소스
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# Backend API Service (Dev)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-service-dev
+  namespace: backend-dev
+spec:
+  selector:
+    app: backend-api
+    environment: dev
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP
+---
+# Backend API Ingress (Dev) - AWS Load Balancer Controller 사용
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api-ingress-dev
+  namespace: backend-dev
+  annotations:
+    # AWS Load Balancer Controller 사용
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    # 🚨 TODO: cert-manager ClusterIssuer 이름 확인 (letsencrypt-staging 또는 letsencrypt-prod)
+    cert-manager.io/cluster-issuer: letsencrypt-staging  # Dev 환경: Staging 인증서
+    # CORS 설정
+    alb.ingress.kubernetes.io/actions.ssl-redirect: |
+      {
+        "Type": "redirect",
+        "RedirectConfig": {
+          "Protocol": "HTTPS",
+          "Port": "443",
+          "StatusCode": "HTTP_301"
+        }
+      }
+spec:
+  tls:
+  - hosts:
+    - api.goteego.store
+    secretName: backend-api-dev-tls
+  rules:
+  - host: api.goteego.store
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api-service-dev
+            port:
+              number: 80
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend-dev 

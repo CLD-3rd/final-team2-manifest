@@ -1,0 +1,139 @@
+---
+# Backend API Deployment (Prod 환경)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-prod
+  namespace: backend-prod
+  labels:
+    app: backend-api
+    environment: prod
+spec:
+  replicas: 3  # Prod 환경: 3개 (고가용성)
+  selector:
+    matchLabels:
+      app: backend-api
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: backend-api
+        environment: prod
+    spec:
+      containers:
+      - name: backend-api
+        # Production용 Docker 이미지
+        image: cjsqudwns/goteego-server:latest
+        imagePullPolicy: IfNotPresent  # Prod 환경: 안정성을 위해 변경시에만
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"  # Prod 환경: Info 로그
+        #  TODO: Read/Write 가능한 DB 엔드포인트 두 개씩 설정
+        # PostgreSQL - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_POSTGRESQL_PRIMARY
+          value: "10.0.20.1"  # PostgreSQL AZ1
+        - name: DB_HOST_POSTGRESQL_SECONDARY
+          value: "10.0.21.1"  # PostgreSQL AZ2
+        # DocumentDB - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_MONGODB_PRIMARY
+          value: "10.0.30.1"  # MongoDB AZ1
+        - name: DB_HOST_MONGODB_SECONDARY
+          value: "10.0.31.1"  # MongoDB AZ2
+        # DB 연결 설정
+        - name: DB_PORT_POSTGRESQL
+          value: "5432"
+        - name: DB_PORT_MONGODB
+          value: "27017"
+        # DB 이름 설정 (선택사항)
+        - name: DB_NAME_POSTGRESQL
+          value: "goteego_prod"
+        - name: DB_NAME_MONGODB
+          value: "goteego_prod"
+        resources:
+          requests:
+            memory: "256Mi"  # Prod 환경: 높은 리소스
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# Backend API Service (Prod)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-service-prod
+  namespace: backend-prod
+spec:
+  selector:
+    app: backend-api
+    environment: prod
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP
+---
+# Backend API Ingress (Prod) - AWS Load Balancer Controller 사용
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api-ingress-prod
+  namespace: backend-prod
+  annotations:
+    # AWS Load Balancer Controller 사용
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    #  TODO: cert-manager ClusterIssuer 이름 확인 (letsencrypt-prod 권장)
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # Prod 환경: Production 인증서
+    # CORS 설정
+    alb.ingress.kubernetes.io/actions.ssl-redirect: |
+      {
+        "Type": "redirect",
+        "RedirectConfig": {
+          "Protocol": "HTTPS",
+          "Port": "443",
+          "StatusCode": "HTTP_301"
+        }
+      }
+spec:
+  tls:
+  - hosts:
+    # TODO: YOUR_DOMAIN을 실제 도메인으로 변경 (예: goteego.store)
+    - api.goteego.store
+    secretName: backend-api-prod-tls
+  rules:
+  #  TODO: YOUR_DOMAIN을 실제 도메인으로 변경
+  - host: api.goteego.store
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api-service-prod
+            port:
+              number: 80
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend-prod 

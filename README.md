@@ -1,190 +1,135 @@
-# ArgoCD App of Apps 패턴 - GitOps 환경 구축
+# 🚀 final-team2-manifest
 
-## 📋 개요
+> **GitOps 기반 애플리케이션 배포 매니페스트**
 
-이 프로젝트는 ArgoCD를 사용한 GitOps 환경을 구축하는 프로젝트입니다. App of Apps 패턴을 사용하여 멀티 환경(dev/prod)을 관리합니다.
+## 📋 **개요**
 
-## 🏗️ 아키텍처
+이 리포지토리는 ArgoCD를 통한 GitOps 기반 애플리케이션 배포를 위한 Kubernetes 매니페스트 저장소입니다.
+**Terraform에서 이미 인프라(EKS, ArgoCD, cert-manager)를 설치했으므로, 여기서는 애플리케이션만 관리합니다.**
+
+## 🔧 **사용자가 설정해야 할 값들**
+
+### **🚨 필수 설정 항목**
+
+1. **Docker Hub 사용자명**
+   - 파일: `overlays/dev/applications/backend-api.yaml`, `overlays/prod/applications/backend-api.yaml`
+   - 설정: `cjsqudwns/goteego-server:latest` ✅ **완료**
+
+2. **도메인명**
+   - 파일: `overlays/dev/applications/backend-api.yaml`, `overlays/prod/applications/backend-api.yaml`
+   - 설정: `api.goteego.store` ✅ **완료**
+
+3. **데이터베이스 엔드포인트** ✅ **완료**
+   - PostgreSQL Primary: `10.0.20.1` (AZ1)
+   - PostgreSQL Secondary: `10.0.21.1` (AZ2)
+   - MongoDB Primary: `10.0.30.1` (AZ1)
+   - MongoDB Secondary: `10.0.31.1` (AZ2)
+
+4. **cert-manager ClusterIssuer**
+   - Dev: `letsencrypt-staging` ✅ **완료**
+   - Prod: `letsencrypt-prod` (권장) 또는 `letsencrypt-staging`
+
+## 🏗️ **구조**
 
 ```
-manifest/
-├── base/                    # 기본 설정
-│   ├── argocd/             # ArgoCD 기본 설정
-│   │   ├── namespace.yaml
-│   │   └── install.yaml
-│   ├── apps/               # 애플리케이션 설정
-│   │   └── app-of-apps.yaml
-│   └── kustomization.yaml
-├── overlays/               # 환경별 설정
-│   ├── dev/               # 개발 환경
-│   │   ├── kustomization.yaml
-│   │   └── patches/
-│   │       ├── argocd-patch.yaml
-│   │       └── app-of-apps-patch.yaml
-│   └── prod/              # 운영 환경
-│       ├── kustomization.yaml
-│       └── patches/
-│           ├── argocd-patch.yaml
-│           └── app-of-apps-patch.yaml
-└── README.md
+final-team2-manifest/
+├── base/
+│   └── apps/
+│       └── app-of-apps.yaml          # App-of-Apps 패턴
+└── overlays/
+    ├── dev/
+    │   ├── applications/
+    │   │   └── backend-api.yaml      # Dev 환경 백엔드 API
+    │   ├── patches/
+    │   │   └── app-of-apps-patch.yaml
+    │   └── kustomization.yaml
+    └── prod/
+        ├── applications/
+        │   └── backend-api.yaml      # Prod 환경 백엔드 API
+        ├── patches/
+        │   └── app-of-apps-patch.yaml
+        └── kustomization.yaml
 ```
 
-## 🚀 설치 단계
+## 🚀 **배포 방법**
 
-### 1단계: 사전 요구사항 확인
+### **1. App-of-Apps 생성 (GitOps 매뉴얼 참조)**
 
 ```powershell
-# AWS CLI 설치 확인
-aws --version
-
-# kubectl 설치 확인
-kubectl version --client
-
-# Helm 설치 확인
-helm version
+# PowerShell에서 App-of-Apps 생성
+@"
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+    targetRevision: dev
+    path: final-team2-manifest/overlays/dev  # dev 또는 prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+"@ | kubectl apply -f -
 ```
 
-### 2단계: EKS 클러스터 연결
+### **2. ArgoCD 웹 UI에서 확인**
+- ArgoCD 웹 UI 접속
+- Applications 메뉴에서 `app-of-apps` 확인
+- 자동 동기화 확인
 
-```powershell
-# 클러스터 연결
-aws eks update-kubeconfig --region ap-northeast-2 --name goteego-team-cluster
+## 🔄 **환경별 차이점**
 
-# 연결 확인
-kubectl get nodes
-```
+| 항목 | Dev | Prod |
+|------|-----|------|
+| **Replicas** | 1 | 3 |
+| **Resources** | 128Mi/100m | 256Mi/250m |
+| **Image Policy** | Always | IfNotPresent |
+| **Docker Image** | `cjsqudwns/goteego-server:latest` | `cjsqudwns/goteego-server:latest` |
+| **Log Level** | debug | info |
+| **Domain** | `api.goteego.store` | `api.goteego.store` |
+| **SSL** | letsencrypt-staging | letsencrypt-prod |
+| **DB Name** | goteego_dev | goteego_prod |
 
-### 3단계: ArgoCD 설치
+## 🔧 **수정 완료 사항**
 
-#### 방법 1: 직접 설치
-```powershell
-# 개발 환경 설치
-.\scripts\install-argocd.ps1 -Environment dev
+✅ **제거된 항목들**:
+- ~~ArgoCD 설치 (인프라에서 이미 설치함)~~
+- ~~cert-manager 설치 (인프라에서 이미 설치함)~~
+- ~~nginx-ingress 설치 (AWS Load Balancer Controller 사용)~~
 
-# 운영 환경 설치
-.\scripts\install-argocd.ps1 -Environment prod
-```
+✅ **변경된 항목들**:
+- **Ingress**: nginx → AWS Load Balancer Controller (ALB)
+- **경로**: `manifest/overlays/` → `final-team2-manifest/overlays/`
+- **네임스페이스**: `argocd-dev/prod` → `argocd` (통합)
 
-#### 방법 2: SSM을 통한 원격 설치
-```powershell
-# 개발 환경 원격 설치
-.\scripts\ssm-deploy-argocd.ps1 -Environment dev
+## 📝 **다음 단계**
 
-# 운영 환경 원격 설치
-.\scripts\ssm-deploy-argocd.ps1 -Environment prod
-```
+1. ✅ **Docker Hub 설정 완료**: `cjsqudwns/goteego-server:latest`
+2. ✅ **도메인 설정 완료**: `api.goteego.store`
+3. ✅ **DB 엔드포인트 설정 완료**: Private IP로 Multi-AZ 구성
+4. 🔄 **Docker 이미지 빌드 및 푸시** (아직 필요시)
+5. 🔄 **Git에 변경사항 커밋 & 푸시**
+6. 🔄 **ArgoCD에서 자동 동기화 확인**
 
-### 4단계: App of Apps 패턴 설정
+## 🎯 **즉시 실행 가능**
 
-```powershell
-# 기본 App of Apps 애플리케이션 적용
-kubectl apply -f manifest/base/apps/app-of-apps.yaml
-```
+**이제 모든 필수 설정이 완료되어 바로 GitOps 워크플로우를 시작할 수 있습니다!**
 
-## 🔧 환경별 설정
+## 🚨 **주의사항**
 
-### 개발 환경 (dev)
-- 네임스페이스: `argocd-dev`
-- 도메인: `argocd-dev.example.com`
-- 인증서: `letsencrypt-staging`
-- 자동 동기화: 활성화
+- **인프라 컴포넌트는 수정하지 마세요** (EKS, ArgoCD, cert-manager는 Terraform에서 관리)
+- **실제 운영 전에 Dev 환경에서 충분히 테스트하세요**
+- **Production 환경에서는 `letsencrypt-prod` 사용을 권장합니다**
 
-### 운영 환경 (prod)
-- 네임스페이스: `argocd-prod`
-- 도메인: `argocd.example.com`
-- 인증서: `letsencrypt-prod`
-- 자동 동기화: 활성화
+---
 
-## 📊 모니터링 및 접속
-
-### ArgoCD UI 접속
-- 개발 환경: https://argocd-dev.example.com
-- 운영 환경: https://argocd.example.com
-
-### 기본 로그인 정보
-- 사용자: `admin`
-- 비밀번호: `AdminPassword123`
-
-### 상태 확인
-```powershell
-# ArgoCD Pod 상태 확인
-kubectl get pods -n argocd-dev
-kubectl get pods -n argocd-prod
-
-# 애플리케이션 상태 확인
-kubectl get applications -n argocd-dev
-kubectl get applications -n argocd-prod
-```
-
-## 🔄 App of Apps 패턴 동작 원리
-
-1. **루트 애플리케이션**: `app-of-apps`가 각 환경의 overlay를 관리
-2. **환경별 관리**: dev/prod 환경별로 별도의 네임스페이스와 설정
-3. **자동 동기화**: Git 저장소 변경 시 자동으로 클러스터에 반영
-4. **헬스 체크**: 애플리케이션 상태 자동 모니터링
-
-## 🛠️ 문제 해결
-
-### 일반적인 문제들
-
-#### 1. ArgoCD Pod가 시작되지 않는 경우
-```powershell
-# Pod 로그 확인
-kubectl logs -n argocd-dev deployment/argocd-server
-
-# 이벤트 확인
-kubectl get events -n argocd-dev --sort-by='.lastTimestamp'
-```
-
-#### 2. 인증서 문제
-```powershell
-# cert-manager 상태 확인
-kubectl get clusterissuer
-kubectl get certificates -n argocd-dev
-```
-
-#### 3. 네트워크 연결 문제
-```powershell
-# Service 상태 확인
-kubectl get svc -n argocd-dev
-kubectl get ingress -n argocd-dev
-```
-
-## 📝 커스터마이징
-
-### 새로운 애플리케이션 추가
-
-1. `manifest/base/apps/` 디렉토리에 새 애플리케이션 YAML 생성
-2. `manifest/base/kustomization.yaml`에 리소스 추가
-3. 환경별 패치 파일 생성 (필요시)
-
-### 환경별 설정 변경
-
-1. `manifest/overlays/{env}/patches/` 디렉토리의 패치 파일 수정
-2. `kubectl apply -k manifest/overlays/{env}/` 실행
-
-## 🔒 보안 고려사항
-
-1. **비밀번호 변경**: 기본 비밀번호를 강력한 비밀번호로 변경
-2. **RBAC 설정**: 적절한 권한 설정
-3. **네트워크 정책**: 필요한 포트만 열기
-4. **로깅**: 감사 로그 활성화
-
-## 📚 참고 자료
-
-- [ArgoCD 공식 문서](https://argo-cd.readthedocs.io/)
-- [App of Apps 패턴](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/)
-- [Kustomize 문서](https://kustomize.io/)
-- [Helm Charts](https://helm.sh/docs/)
-
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 
+**Happy GitOps! 🎉** 

@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/your-repo.git
-    targetRevision: HEAD
-    path: manifest/overlays/{{ENVIRONMENT}}
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+    targetRevision: dev
+    path: final-team2-manifest/overlays/{{ENVIRONMENT}}
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
