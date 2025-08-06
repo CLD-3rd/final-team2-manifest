@@ -33,7 +33,7 @@ spec:
           value: "development"
         - name: LOG_LEVEL
           value: "debug"  # Dev 환경: 디버그 로그
-        # 🚨 TODO: Read/Write 가능한 DB 엔드포인트 두 개씩 설정
+        #  TODO: Read/Write 가능한 DB 엔드포인트 두 개씩 설정
         # PostgreSQL - Primary/Secondary (모두 Read/Write 가능)
         - name: DB_HOST_POSTGRESQL_PRIMARY
           value: "10.0.20.1"  # PostgreSQL AZ1
@@ -44,16 +44,25 @@ spec:
           value: "10.0.30.1"  # MongoDB AZ1
         - name: DB_HOST_MONGODB_SECONDARY
           value: "10.0.31.1"  # MongoDB AZ2
+        # ElastiCache Redis - Primary/Secondary (캐싱 및 세션 저장용)
+        - name: REDIS_HOST_PRIMARY
+          value: "10.0.40.1"  # ElastiCache AZ1
+        - name: REDIS_HOST_SECONDARY
+          value: "10.0.41.1"  # ElastiCache AZ2
         # DB 연결 설정
         - name: DB_PORT_POSTGRESQL
           value: "5432"
         - name: DB_PORT_MONGODB
           value: "27017"
+        - name: REDIS_PORT
+          value: "6379"
         # DB 이름 설정 (선택사항)
         - name: DB_NAME_POSTGRESQL
           value: "goteego_dev"
         - name: DB_NAME_MONGODB
           value: "goteego_dev"
+        - name: REDIS_DB_INDEX
+          value: "0"  # Redis DB 인덱스
         resources:
           requests:
             memory: "128Mi"  # Dev 환경: 적은 리소스
@@ -101,7 +110,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    # 🚨 TODO: cert-manager ClusterIssuer 이름 확인 (letsencrypt-staging 또는 letsencrypt-prod)
+    # TODO: cert-manager ClusterIssuer staging 인데 향후 prod로 변경 필요
     cert-manager.io/cluster-issuer: letsencrypt-staging  # Dev 환경: Staging 인증서
     # CORS 설정
     alb.ingress.kubernetes.io/actions.ssl-redirect: |
@@ -116,10 +125,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - api.goteego.store
+    - goteego.store
     secretName: backend-api-dev-tls
   rules:
-  - host: api.goteego.store
+  - host: goteego.store
     http:
       paths:
       - path: /
