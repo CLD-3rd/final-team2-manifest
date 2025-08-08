@@ -18,7 +18,8 @@ configMapGenerator:
     literals:
       - ENVIRONMENT=prod
       - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
+      
 
-commonLabels:
+labels:
   environment: prod
   app.kubernetes.io/environment: prod 

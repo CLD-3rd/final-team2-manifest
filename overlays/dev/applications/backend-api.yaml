@@ -125,10 +125,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - goteego.store
+    - api.dev.goteego.store
     secretName: backend-api-dev-tls
   rules:
-  - host: goteego.store
+  - host: api.dev.goteego.store
     http:
       paths:
       - path: /
