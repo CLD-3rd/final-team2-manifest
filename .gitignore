@@ -25,3 +25,4 @@ replay_pid*
 
 # 기타 스크립트
 *.ps1
+**//.cursor/*

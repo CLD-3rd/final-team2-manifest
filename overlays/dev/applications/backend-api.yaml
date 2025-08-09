@@ -9,7 +9,7 @@ metadata:
     app: backend-api
     environment: dev
 spec:
-  replicas: 1  # Dev 환경: 1개만
+  replicas: 2  # Dev 환경: 2개만(멀티티서버테스트용)
   selector:
     matchLabels:
       app: backend-api
@@ -110,25 +110,10 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    # TODO: cert-manager ClusterIssuer staging 인데 향후 prod로 변경 필요
-    cert-manager.io/cluster-issuer: letsencrypt-staging  # Dev 환경: Staging 인증서
-    # CORS 설정
-    alb.ingress.kubernetes.io/actions.ssl-redirect: |
-      {
-        "Type": "redirect",
-        "RedirectConfig": {
-          "Protocol": "HTTPS",
-          "Port": "443",
-          "StatusCode": "HTTP_301"
-        }
-      }
+   
 spec:
-  tls:
-  - hosts:
-    - goteego.store
-    secretName: backend-api-dev-tls
   rules:
-  - host: goteego.store
+  - host: dev.api.goteego.store
     http:
       paths:
       - path: /
