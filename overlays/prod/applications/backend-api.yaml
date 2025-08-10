@@ -111,7 +111,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     #  TODO: cert-manager ClusterIssuer 이름 확인 (letsencrypt-prod 권장)
-    cert-manager.io/cluster-issuer: letsencrypt-prod  # Prod 환경: Production 인증서
+    cert-manager.io/cluster-issuer: letsencrypt-staging  # Staging 인증서
     # CORS 설정
     alb.ingress.kubernetes.io/actions.ssl-redirect: |
       {
@@ -133,13 +133,13 @@ spec:
   - host: api.goteego.store
     http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: backend-api-service-prod
-            port:
-              number: 80
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: backend-api-service-prod
+              port:
+                number: 80
 ---
 # Namespace
 apiVersion: v1

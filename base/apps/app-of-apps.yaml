@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
-    targetRevision: dev
+    targetRevision: dev # 상관X 어차피 overlays 우선 적용됨
     path: final-team2-manifest/overlays/{{ENVIRONMENT}}
   destination:
     server: https://kubernetes.default.svc
