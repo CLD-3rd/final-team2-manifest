@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-dev
+  namespace: backend-dev
+  labels:
+    app: backend-api
+    environment: dev
+spec:
+  replicas: 2  # Dev 환경: 2개만(멀티티서버테스트용)
+  template:
+    spec:
+      containers:
+      - name: backend-api
+        imagePullPolicy: Always  # Dev 환경: 항상 최신 이미지
+        env:
+        - name: ENVIRONMENT
+          value: "development"
+        - name: LOG_LEVEL
+          value: "debug"  # Dev 환경: 디버그 로그
+        #  TODO: Read/Write 가능한 DB 엔드포인트 두 개씩 설정
+        # PostgreSQL - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_POSTGRESQL_PRIMARY
+          value: "10.0.20.1"  # PostgreSQL AZ1
+        - name: DB_HOST_POSTGRESQL_SECONDARY
+          value: "10.0.21.1"  # PostgreSQL AZ2
+        # DocumentDB - Primary/Secondary (모두 Read/Write 가능)
+        - name: DB_HOST_MONGODB_PRIMARY
+          value: "10.0.30.1"  # MongoDB AZ1
+        - name: DB_HOST_MONGODB_SECONDARY
+          value: "10.0.31.1"  # MongoDB AZ2
+        # ElastiCache Redis - Primary/Secondary (캐싱 및 세션 저장용)
+        - name: REDIS_HOST_PRIMARY
+          value: "10.0.40.1"  # ElastiCache AZ1
+        - name: REDIS_HOST_SECONDARY
+          value: "10.0.41.1"  # ElastiCache AZ2
+        # DB 연결 설정
+        - name: DB_PORT_POSTGRESQL
+          value: "5432"
+        - name: DB_PORT_MONGODB
+          value: "27017"
+        - name: REDIS_PORT
+          value: "6379"
+        # DB 이름 설정 (선택사항)
+        - name: DB_NAME_POSTGRESQL
+          value: "goteego_dev"
+        - name: DB_NAME_MONGODB
+          value: "goteego_dev"
+        - name: REDIS_DB_INDEX
+          value: "0"  # Redis DB 인덱스
+        resources:
+          requests:
+            memory: "128Mi"  # Dev 환경: 적은 리소스
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
