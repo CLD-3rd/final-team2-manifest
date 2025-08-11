@@ -8,7 +8,8 @@ on:
 
 env:
   ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
-  ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+  ARGOCD_USERNAME: ${{ secrets.ARGOCD_USERNAME }}
+  ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
 jobs:
   deploy:
@@ -42,8 +43,11 @@ jobs:
         install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
         rm argocd-linux-amd64
         
-        # ArgoCD 로그인
-        argocd login $ARGOCD_SERVER --auth-token $ARGOCD_TOKEN --grpc-web
+        # ArgoCD 로그인 (사용자/비밀번호)
+        argocd login $ARGOCD_SERVER \
+          --username "${{ secrets.ARGOCD_USERNAME }}" \
+          --password "${{ secrets.ARGOCD_PASSWORD }}" \
+          --insecure --grpc-web
         
         # 애플리케이션 배포
         argocd app sync app-of-apps --prune
