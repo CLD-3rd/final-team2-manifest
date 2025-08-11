@@ -19,6 +19,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: backend-api-service-dev
+            name: backend-api-service # base의 서비스 이름
             port:
               number: 80
