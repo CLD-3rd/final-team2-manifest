@@ -22,3 +22,24 @@
 # commonLabels:
 #   environment: prod
 #   app.kubernetes.io/environment: prod 
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 이 Kustomization으로 생성되는 모든 리소스에 적용될 기본 네임스페이스
+namespace: backend-prod
+
+# 1. 공통 설정(base)과 prod 환경 전용 리소스를 포함
+resources:
+  - ../../base
+  - ingress.yaml # Prod 환경용 Ingress 
+
+# 2. base의 내용을 prod 환경에 맞게 수정(patch)
+patches:
+  - path: deployment-patch.yaml # Prod용 Deployment 수정사항 (replicas, env 등)
+
+# 3. Prod 환경에서 사용할 Docker 이미지를 지정
+images:
+  - name: backend-api # base의 Deployment 이름과 일치
+    newName: cjsqudwns/goteego-server # 운영용 이미지 저장소
+    newTag: latest # 현재는 latest로 되어있는데, prod는 당연히 안정된 버전의 태그로 설정해야 함 (추후 변경 바랍니다.)
