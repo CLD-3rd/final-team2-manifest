@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-of-apps
-  namespace: argocd
+  name: app-of-apps  
+  namespace: argocd                    # ArgoCD 설치된 namespace라서 따로 바꾸지 않는 이상, default로 "argocd"
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "0"  # App-of-Apps 패턴에서 동기화 순서를 지정하는 옵션 (0이 가장 먼저라고 함)
 spec:
   project: default
   source:
@@ -21,3 +21,26 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true 
+
+  # project: 어떤 ArgoCD 프로젝트에 속할 것인가?
+  # - 기본값은 "default"로 설정되어 있음
+
+  # source: 무엇을 배포할 것인가?
+  # - repoURL: Git 저장소 주소
+  # - targetRevision: Git 브랜치/태그/커밋 (여기선 dev 브랜치)
+  # - path: repoURL의 루트 디렉토리를 기준으로 K8s manifest 또는 Kustomize/Helm 차트가 위치한 경로
+  #   ※ 저장소 루트가 이미 final-team2-manifest이므로 overlays/dev로만 작성
+
+  # destination: 어디에 배포할 것인가?
+  # - server: 배포 대상 Kubernetes API 서버 (기본적으로 ArgoCD가 설치된 클러스터가 https://kubernetes.default.svc라서 아래처럼 작성)
+  # - namespace: 리소스들이 배포될 네임스페이스
+  #   ※ 여기서 argocd로 되어 있지만, 실제 앱 리소스는 다른 namespace에 배포하는 것이 일반적임
+
+  # syncPolicy: 어떻게 동기화(배포) 할 것인가?
+  # - automated: 자동 동기화 모드
+  #     prune: Git에 없어진 리소스는 클러스터에서도 삭제
+  #     selfHeal: 클러스터 리소스가 Git 정의와 다르면 자동으로 되돌림
+  # - syncOptions:
+  #     CreateNamespace=true: 지정한 namespace가 없으면 자동 생성
+  #
+  # ※ 설정들이 argoCD에서 repogitory 등록할 때 나오는 내용이라 중복이라고 생각했는데 중복 맞았음. 단, manifest로 관리하면 GitOps 철학에 맞게 변경 이력 추적 및 일관성 유지가 가능하다고 함
