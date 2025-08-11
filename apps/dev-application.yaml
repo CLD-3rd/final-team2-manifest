@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backend-api-dev  
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+    targetRevision: dev
+    path: overlays/dev  # 이 Application이 바라볼 Kustomize 경로
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: backend-dev # 실제 앱이 배포될 네임스페이스
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
