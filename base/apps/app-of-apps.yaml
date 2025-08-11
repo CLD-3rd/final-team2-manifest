@@ -1,26 +1,26 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: app-of-apps  
-  namespace: argocd                    # ArgoCD 설치된 namespace라서 따로 바꾸지 않는 이상, default로 "argocd"
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"  # App-of-Apps 패턴에서 동기화 순서를 지정하는 옵션 (0이 가장 먼저라고 함)
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
-    targetRevision: dev
-    #path: final-team2-manifest/overlays/{{ENVIRONMENT}}
-    path: overlays/dev
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true 
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: app-of-apps  
+#   namespace: argocd                    # ArgoCD 설치된 namespace라서 따로 바꾸지 않는 이상, default로 "argocd"
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "0"  # App-of-Apps 패턴에서 동기화 순서를 지정하는 옵션 (0이 가장 먼저라고 함)
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
+#     targetRevision: dev
+#     #path: final-team2-manifest/overlays/{{ENVIRONMENT}}
+#     path: overlays/dev
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: argocd
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true 
 
   # project: 어떤 ArgoCD 프로젝트에 속할 것인가?
   # - 기본값은 "default"로 설정되어 있음
