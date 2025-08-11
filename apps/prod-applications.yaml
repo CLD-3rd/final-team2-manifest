@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
-    targetRevision: main # Prod는 dev 브랜치를 바라보도록 설정 (권장은 main)
+    targetRevision: dev # Prod는 dev 브랜치를 바라보도록 설정 (권장은 main)
     path: overlays/prod
   destination:
     server: https://kubernetes.default.svc
