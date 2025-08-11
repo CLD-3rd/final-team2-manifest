@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-api
-  labels:
-    app: backend-api
-    environment: dev
 spec:
   replicas: 2  # Dev 환경: 2개만(멀티티서버테스트용)
   template:
