@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
-    targetRevision: dev # 상관X 어차피 overlays 우선 적용됨
+    targetRevision: dev
     #path: final-team2-manifest/overlays/{{ENVIRONMENT}}
     path: overlays/dev
   destination:
