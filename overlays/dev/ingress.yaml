@@ -1,0 +1,24 @@
+# Backend API Ingress (Dev) - AWS Load Balancer Controller 사용
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-api-ingress-dev
+  namespace: backend-dev
+  annotations:
+    # AWS Load Balancer Controller 사용
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+   
+spec:
+  rules:
+  - host: dev.api.goteego.store
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api-service-dev
+            port:
+              number: 80
