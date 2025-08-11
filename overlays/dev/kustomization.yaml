@@ -1,25 +1,48 @@
+# apiVersion: kustomize.config.k8s.io/v1beta1
+# kind: Kustomization
+
+# namespace: backend-dev
+
+# resources:
+#   - ../../base
+#   - applications/backend-api.yaml
+
+# patches:
+#   - path: patches/app-of-apps-patch.yaml
+#     target:
+#       kind: Application
+#       name: app-of-apps
+
+# configMapGenerator:
+#   - name: backend-config
+#     literals:
+#       - ENVIRONMENT=dev
+#       - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
+      
+
+# commonLabels:
+#   environment: dev
+#   app.kubernetes.io/environment: dev 
+
+
+
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: backend-dev
+# 이 kustomization이 적용될 리소스들의 기본 네임스페이스
+namespace: backend-dev 
 
 resources:
   - ../../base
-  - applications/backend-api.yaml
+  - ingress.yaml # 아래 ingress.yaml 참고
 
+# dev 환경에 맞게 base를 수정하는 패치
 patches:
-  - path: patches/app-of-apps-patch.yaml
-    target:
-      kind: Application
-      name: app-of-apps
+  - path: deployment-patch.yaml
 
-configMapGenerator:
-  - name: backend-config
-    literals:
-      - ENVIRONMENT=dev
-      - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
-      
-
-commonLabels:
-  environment: dev
-  app.kubernetes.io/environment: dev 
+# dev 환경의 Docker 이미지 태그 지정
+images:
+  - name: backend-api # base의 deployment.metadata.name과 일치
+    newName: cjsqudwns/goteego-server # CI/CD가 업데이트할 이미지 주소
+    newTag: 99f26c4 # 백엔드 CI/CD가 업데이트할 태그
