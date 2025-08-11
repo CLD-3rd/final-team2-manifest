@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-api
-  labels:
-    app: backend-api
-    environment: prod
 spec:
   replicas: 3  # Prod 환경: 3개 (고가용성)
   template:
