@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
     targetRevision: main # Prod는 main 브랜치를 바라보도록 설정 - 쉽게 말해서 main 브랜치에 어떤 내용이 commit되면 argoCD가 sync할 수 있도록 한다는 의미
-    path: overlays/prod
+    path: overlays/prod  # 이 Application이 바라볼 Kustomize 경로
   destination:
     server: https://kubernetes.default.svc
-    namespace: backend-prod
+    namespace: backend-prod  # 실제 앱이 배포될 네임스페이스
   syncPolicy:
     automated:
       prune: true
