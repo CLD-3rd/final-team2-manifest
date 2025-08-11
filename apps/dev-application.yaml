@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
-    targetRevision: dev
+    targetRevision: dev   # dev는 dev 브랜치를 바라보도록 설정 - 쉽게 말해서 dev 브랜치에 어떤 내용이 commit되면 argoCD가 sync할 수 있도록 한다는 의미
     path: overlays/dev  # 이 Application이 바라볼 Kustomize 경로
   destination:
     server: https://kubernetes.default.svc
