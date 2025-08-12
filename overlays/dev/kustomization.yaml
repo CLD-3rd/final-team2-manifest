@@ -13,12 +13,6 @@ patches:
       kind: Application
       name: app-of-apps
 
-configMapGenerator:
-  - name: backend-config
-    literals:
-      - ENVIRONMENT=dev
-      - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
-      
 
 commonLabels:
   environment: dev

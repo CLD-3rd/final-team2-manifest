@@ -70,7 +70,7 @@ spec:
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
     targetRevision: dev
-    path: final-team2-manifest/overlays/dev  # dev 또는 prod
+    path: overlays/dev  # dev 또는 prod
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -98,7 +98,7 @@ spec:
 | **Docker Image** | `cjsqudwns/goteego-server:latest` | `cjsqudwns/goteego-server:latest` |
 | **Log Level** | debug | info |
 | **Domain** | `api.goteego.store` | `api.goteego.store` |
-| **SSL** | letsencrypt-staging | letsencrypt-prod |
+| **SSL** | none (HTTP) | none (HTTP) |
 | **DB Name** | goteego_dev | goteego_prod |
 
 ## 🔧 **수정 완료 사항**
@@ -109,7 +109,7 @@ spec:
 - ~~nginx-ingress 설치 (AWS Load Balancer Controller 사용)~~
 
 ✅ **변경된 항목들**:
-- **Ingress**: nginx → AWS Load Balancer Controller (ALB)
+- **Ingress**: AWS Load Balancer Controller (ALB) (HTTP only)
 - **경로**: `manifest/overlays/` → `final-team2-manifest/overlays/`
 - **네임스페이스**: `argocd-dev/prod` → `argocd` (통합)
 
@@ -130,7 +130,7 @@ spec:
 
 - **인프라 컴포넌트는 수정하지 마세요** (EKS, ArgoCD, cert-manager는 Terraform에서 관리)
 - **실제 운영 전에 Dev 환경에서 충분히 테스트하세요**
-- **Production 환경에서는 `letsencrypt-prod` 사용을 권장합니다**
+- 현재는 cert-manager 및 TLS를 사용하지 않으므로 ArgoCD/UI 및 애플리케이션 Ingress는 HTTP 기준입니다.
 
 ---
 
