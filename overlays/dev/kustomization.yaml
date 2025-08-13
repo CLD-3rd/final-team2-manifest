@@ -45,4 +45,4 @@ patches:
 images:
   - name: backend-api # base의 deployment.metadata.name과 일치
     newName: cjsqudwns/goteego-server # CI/CD가 업데이트할 이미지 주소
-    newTag: 99f26c4 # 백엔드 CI/CD가 업데이트할 태그
+    newTag: b4f875d # 백엔드 CI/CD가 업데이트할 태그
