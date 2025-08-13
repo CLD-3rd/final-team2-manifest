@@ -7,6 +7,6 @@ spec:
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
     targetRevision: HEAD
-    path: manifest/overlays/prod
+    path: overlays/prod
   destination:
     namespace: argocd-prod 
