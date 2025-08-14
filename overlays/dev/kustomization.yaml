@@ -13,7 +13,7 @@ patches:
 - path: deployment-patch.yaml
 
 # dev 환경의 Docker 이미지 태그 지정
-images:
-- name: backend-api
-  newName: cjsqudwns/goteego-server
-  newTag: "7205637"
+# images:
+# - name: backend-api
+#   newName: cjsqudwns/goteego-server
+#   newTag: "7205637"
