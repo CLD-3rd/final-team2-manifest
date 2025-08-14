@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: backend-api
 spec:
-  replicas: 2  # Dev 환경: 2개만(멀티티서버테스트용)
+  replicas: 3  # Dev 환경: 3개만(멀티티서버테스트용)
   template:
     spec:
       containers:
