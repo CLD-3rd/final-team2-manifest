@@ -16,4 +16,4 @@ patches:
 images:
 - name: backend-api
   newName: cjsqudwns/goteego-server
-  newTag: b4f875d
+  newTag: "7205637"
