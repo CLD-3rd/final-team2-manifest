@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: backend-api
 spec:
-  replicas: 3  # Prod 환경: 3개 (고가용성)
+  replicas: 5  # Prod 환경: 5개 (고가용성)
   template:
     spec:
       containers:
