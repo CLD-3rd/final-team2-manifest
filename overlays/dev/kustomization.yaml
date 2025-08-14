@@ -2,18 +2,21 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # 이 kustomization이 적용될 리소스들의 기본 네임스페이스
-namespace: backend-dev 
+namespace: backend-dev
 
 resources:
-  - ../../base
-  - ingress.yaml # 아래 ingress.yaml 참고
+- ../../base
+- ingress.yaml
 
 # dev 환경에 맞게 base를 수정하는 패치
 patches:
-  - path: deployment-patch.yaml
+- path: deployment-patch.yaml
 
 # dev 환경의 Docker 이미지 태그 지정
 images:
-  - name: backend-api # base의 deployment.metadata.name과 일치
-    newName: cjsqudwns/goteego-server # CI/CD가 업데이트할 이미지 주소
-    newTag: b4f875d # 백엔드 CI/CD가 업데이트할 태그
+- name: backend-api
+  newName: cjsqudwns/goteego-server
+  newTag: b4f875d
+- name: cjsqudwns/goteego-server
+  newName: cjsqudwns/goteego-server
+  newTag: 8fdc843
