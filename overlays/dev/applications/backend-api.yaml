@@ -23,7 +23,7 @@ spec:
       containers:
       - name: backend-api
         # Docker Hub 태그 확인 후 수정 필요
-        image: cjsqudwns/goteego-server:4b9ca9b
+        image: cjsqudwns/goteego-server:a5fff1e
         imagePullPolicy: Always  # Dev 환경: 항상 최신 이미지
         ports:
         - containerPort: 8080
