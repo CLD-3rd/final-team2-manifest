@@ -17,4 +17,4 @@ patches:
 images:
   - name: backend-api # base의 Deployment 이름과 일치
     newName: cjsqudwns/goteego-server # 운영용 이미지 저장소
-    newTag: latest # 현재는 latest로 되어있는데, prod는 당연히 안정된 버전의 태그로 설정해야 함 (추후 변경 바랍니다.)
+    newTag: 99f26c4 # prod는 안정된 버전의 태그로 설정해야 함 (플젝 끝나갈 때 쯤 다시한번 수정해야 함) [confirm]
