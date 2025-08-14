@@ -1,28 +1,3 @@
-# apiVersion: kustomize.config.k8s.io/v1beta1
-# kind: Kustomization
-
-# namespace: backend-prod
-
-# resources:
-#   - ../../base
-#   - applications/backend-api.yaml
-
-# patches:
-#   - path: patches/app-of-apps-patch.yaml
-#     target:
-#       kind: Application
-#       name: app-of-apps
-
-# configMapGenerator:
-#   - name: backend-config
-#     literals:
-#       - ENVIRONMENT=prod
-#       - REPO_URL=https://github.com/CLD-3rd/final-team2-manifest.git
-
-# commonLabels:
-#   environment: prod
-#   app.kubernetes.io/environment: prod 
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
