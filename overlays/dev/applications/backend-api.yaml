@@ -106,11 +106,14 @@ metadata:
   name: backend-api-ingress-dev
   namespace: backend-dev
   annotations:
-    # AWS Load Balancer Controller 사용
+    external-dns.alpha.kubernetes.io/hostname: dev.api.goteego.store
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-   
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "${AP_NORTHEAST_2_ACM_ARN}"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
 spec:
   rules:
   - host: dev.api.goteego.store
