@@ -65,11 +65,11 @@ spec:
           value: "0"  # Redis DB 인덱스
         resources:
           requests:
-            memory: "128Mi"  # Dev 환경: 적은 리소스
-            cpu: "100m"
+            memory: "512Mi"  # Dev 환경: 적은 리소스
+            cpu: "250m"
           limits:
-            memory: "256Mi"
-            cpu: "200m"
+            memory: "1Gi"
+            cpu: "500m"
         livenessProbe:
           httpGet:
             path: /health
