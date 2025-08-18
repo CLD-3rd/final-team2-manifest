@@ -1,0 +1,11 @@
+namespace: autoscale-dev
+deployment_name: hpa-test
+app_label: hpa-test
+container_name: hpa-test-container
+container_image: nginx:latest
+min_replicas: 2
+max_replicas: 5
+target_cpu_utilization: 50
+internal_service_name: hpa-test-internal-svc
+external_service_name: hpa-test-external-svc
+target_group_arn: arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/my-target-group/abcd1234
