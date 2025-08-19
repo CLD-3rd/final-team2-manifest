@@ -1,4 +1,16 @@
 ---
+# Backend API ServiceAccount (Dev 환경)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backend-api-sa
+  namespace: backend-dev
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/goteego-team-backend-api-ssm-role
+  labels:
+    app: backend-api
+    environment: dev
+---
 # Backend API Deployment (Dev 환경)
 apiVersion: apps/v1
 kind: Deployment
@@ -20,6 +32,7 @@ spec:
         app: backend-api
         environment: dev
     spec:
+      serviceAccountName: backend-api-sa  # ServiceAccount 연결
       containers:
       - name: backend-api
         # Docker Hub 태그 확인 후 수정 필요
@@ -63,6 +76,22 @@ spec:
           value: "goteego_dev"
         - name: REDIS_DB_INDEX
           value: "0"  # Redis DB 인덱스
+        # 데이터베이스 비밀번호 - Secret에서 가져오기
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: DB_PASSWORD
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: MONGO_PASSWORD
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: REDIS_PASSWORD
         resources:
           requests:
             memory: "512Mi"  # Dev 환경: 적은 리소스
@@ -112,7 +141,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
-    alb.ingress.kubernetes.io/certificate-arn: "${AP_NORTHEAST_2_ACM_ARN}"
+    alb.ingress.kubernetes.io/certificate-arn: "$arn:aws:acm:ap-northeast-2:194722398200:certificate/70dcc479-3d53-4e11-9ba0-498ba4f797dc"
     alb.ingress.kubernetes.io/backend-protocol: HTTP
 spec:
   rules:
