@@ -4,9 +4,17 @@ metadata:
   name: app-of-apps
   namespace: argocd-prod
 spec:
+  project: default
   source:
     repoURL: https://github.com/CLD-3rd/final-team2-manifest.git
     targetRevision: HEAD
     path: overlays/prod
   destination:
-    namespace: argocd-prod 
+    server: https://kubernetes.default.svc
+    namespace: argocd-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 
