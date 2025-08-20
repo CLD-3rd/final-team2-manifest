@@ -77,21 +77,21 @@ spec:
         - name: REDIS_DB_INDEX
           value: "0"  # Redis DB 인덱스
         # 데이터베이스 비밀번호 - Secret에서 가져오기
-        - name: DB_PASSWORD
-          valueFrom:
+#        - name: DB_PASSWORD
+#          valueFrom:
 #            secretKeyRef:
 #              name: db-secrets
-            key: DB_PASSWORD
-        - name: MONGO_PASSWORD
-          valueFrom:
+#            key: DB_PASSWORD
+#        - name: MONGO_PASSWORD
+#          valueFrom:
             #secretKeyRef:
              # name: db-secrets
-            key: MONGO_PASSWORD
-        - name: REDIS_PASSWORD
-          valueFrom:
+#            key: MONGO_PASSWORD
+ #       - name: REDIS_PASSWORD
+  #        valueFrom:
             #secretKeyRef:
              # name: db-secrets
-            key: REDIS_PASSWORD
+   #         key: REDIS_PASSWORD
         resources:
           requests:
             memory: "512Mi"  # Dev 환경: 적은 리소스
