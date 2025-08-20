@@ -135,23 +135,28 @@ metadata:
   name: backend-api-ingress-prod
   namespace: backend-prod
   annotations:
-    # AWS Load Balancer Controller 사용
+    external-dns.alpha.kubernetes.io/hostname: api.goteego.store
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:194722398200:certificate/70dcc479-3d53-4e11-9ba0-498ba4f797dc"
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/success-codes: "200"
 spec:
   rules:
-  #  TODO: YOUR_DOMAIN을 실제 도메인으로 변경
   - host: api.goteego.store
     http:
       paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: backend-api-service-prod
-              port:
-                number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-api-service-prod
+            port:
+              number: 80
 ---
 # Namespace
 apiVersion: v1
